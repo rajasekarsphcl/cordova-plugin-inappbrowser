@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Rect;
 import android.os.Parcelable;
 import android.provider.Browser;
 import android.content.res.Resources;
@@ -38,6 +39,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.util.TypedValue;
 import android.util.DisplayMetrics; /* ADDED */
 import android.view.Gravity;
@@ -756,8 +758,20 @@ public class InAppBrowser extends CordovaPlugin {
                         (float) dipValue,
                         cordova.getActivity().getResources().getDisplayMetrics()
                 );
-
                 return value;
+            }
+
+            public int px2dp(float px)  {
+                return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+            }
+
+            private int statusBarHeight() {
+                Resources resources = cordova.getActivity().getResources();
+                int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+                if (resourceId > 0) {
+                    return resources.getDimensionPixelSize(resourceId);
+                }
+                return 0;
             }
 
             private View createCloseButton(int id) {
@@ -1106,7 +1120,19 @@ public class InAppBrowser extends CordovaPlugin {
                 int displayWidth = displayMetrics.widthPixels;
                 int bottomreduceheightbyInPixels = dpToPixels(bottomreduceheightby);
                 int androidOffsetSpaceInPixels = dpToPixels(androidoffsetspace);
-                int displayHeight = displayMetrics.heightPixels - bottomreduceheightbyInPixels - androidOffsetSpaceInPixels;
+                int statusbarHeight = this.statusBarHeight();
+                Log.e(LOG_TAG, "bottomreduceheightbyInPixels: " + bottomreduceheightbyInPixels);
+                Log.e(LOG_TAG, "statusbarHeight: " + px2dp(statusbarHeight));
+                int targetHeight = 0;
+                if(px2dp(statusbarHeight) <= 25) {
+                    // no notch
+                    targetHeight = statusbarHeight;
+                }
+                Log.e(LOG_TAG, "targetHeight: " + targetHeight);
+                // no notch
+                // int displayHeight = displayMetrics.heightPixels - bottomreduceheightbyInPixels - 63;
+                // notch
+                int displayHeight = displayMetrics.heightPixels - bottomreduceheightbyInPixels - targetHeight;
                 lp.height = displayHeight;
                 lp.y = topmargin;
                 /* ADDED BY CANARY - END */
@@ -1579,3 +1605,4 @@ public class InAppBrowser extends CordovaPlugin {
         }
     }
 }
+
