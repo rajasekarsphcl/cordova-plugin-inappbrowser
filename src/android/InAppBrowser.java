@@ -41,7 +41,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
-import android.util.DisplayMetrics; /* ADDED */
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -123,11 +123,10 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String FOOTER_COLOR = "footercolor";
     private static final String BEFORELOAD = "beforeload";
     private static final String FULLSCREEN = "fullscreen";
-    private static final String BOTTOM_HEIGHT_REDUCE_BY = "bottomreduceheightby"; /* MODIFIED_FOR_EMBEDDING */
-    private static final String ANDROID_OFFSET_SPACE = "androidoffsetspace"; /* MODIFIED_FOR_EMBEDDING */
-    private static final String TOP_MARGIN = "topmargin"; /* MODIFIED_FOR_EMBEDDING */
+    private static final String BOTTOM_HEIGHT_REDUCE_BY = "bottomreduceheightby";
+    private static final String TOP_MARGIN = "topmargin";
 
-    private static final List customizableOptions = Arrays.asList(CLOSE_BUTTON_CAPTION, TOOLBAR_COLOR, NAVIGATION_COLOR, CLOSE_BUTTON_COLOR, FOOTER_COLOR, BOTTOM_HEIGHT_REDUCE_BY, ANDROID_OFFSET_SPACE, TOP_MARGIN);
+    private static final List customizableOptions = Arrays.asList(CLOSE_BUTTON_CAPTION, TOOLBAR_COLOR, NAVIGATION_COLOR, CLOSE_BUTTON_COLOR, FOOTER_COLOR, BOTTOM_HEIGHT_REDUCE_BY, TOP_MARGIN);
 
     private InAppBrowserDialog dialog;
     private WebView inAppWebView;
@@ -155,9 +154,8 @@ public class InAppBrowser extends CordovaPlugin {
     private boolean hideUrlBar = false;
     private boolean showFooter = false;
     private String footerColor = "";
-    private int bottomreduceheightby = 0; /* MODIFIED_FOR_EMBEDDING */
-    private int androidoffsetspace = 0; /* MODIFIED_FOR_EMBEDDING */
-    private int topmargin = 0; /* MODIFIED_FOR_EMBEDDING */
+    private int bottomreduceheightby = 0;
+    private int topmargin = 0;
     private String beforeload = "";
     private boolean fullscreen = true;
     private String[] allowedSchemes;
@@ -723,18 +721,14 @@ public class InAppBrowser extends CordovaPlugin {
             if (footerColorSet != null) {
                 footerColor = footerColorSet;
             }
-            String heightSet = features.get(BOTTOM_HEIGHT_REDUCE_BY); /* MODIFIED_FOR_EMBEDDING */
-            if (Integer.parseInt(heightSet) > 0) { /* MODIFIED_FOR_EMBEDDING */
-                bottomreduceheightby = Integer.parseInt(heightSet); /* MODIFIED_FOR_EMBEDDING */
-            } /* MODIFIED_FOR_EMBEDDING */
-            String offsetSpaceSet = features.get(ANDROID_OFFSET_SPACE); /* MODIFIED_FOR_EMBEDDING */
-            if (Integer.parseInt(offsetSpaceSet) > 0) { /* MODIFIED_FOR_EMBEDDING */
-                androidoffsetspace = Integer.parseInt(offsetSpaceSet); /* MODIFIED_FOR_EMBEDDING */
-            } /* MODIFIED_FOR_EMBEDDING */
-            String marginSet = features.get(TOP_MARGIN); /* MODIFIED_FOR_EMBEDDING */
-            if (Integer.parseInt(marginSet) > 0) { /* MODIFIED_FOR_EMBEDDING */
-                topmargin = Integer.parseInt(marginSet); /* MODIFIED_FOR_EMBEDDING */
-            } /* MODIFIED_FOR_EMBEDDING */
+            String heightSet = features.get(BOTTOM_HEIGHT_REDUCE_BY);
+            if (Integer.parseInt(heightSet) > 0) {
+                bottomreduceheightby = Integer.parseInt(heightSet);
+            }
+            String marginSet = features.get(TOP_MARGIN);
+            if (Integer.parseInt(marginSet) > 0) {
+                topmargin = Integer.parseInt(marginSet);
+            }
             if (features.get(BEFORELOAD) != null) {
                 beforeload = features.get(BEFORELOAD);
             }
@@ -835,13 +829,13 @@ public class InAppBrowser extends CordovaPlugin {
                 dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
                 dialog.getWindow().getAttributes().gravity = Gravity.TOP;
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL); /* MODIFIED_FOR_EMBEDDING */
-                dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND); /* MODIFIED_FOR_EMBEDDING */
+                dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
                 if (fullscreen) {
                     dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
                 }
                 dialog.setCancelable(true);
-                dialog.setCanceledOnTouchOutside(true); /* MODIFIED_FOR_EMBEDDING */
+                dialog.setCanceledOnTouchOutside(true);
                 dialog.setInAppBroswer(getInAppBrowser());
 
                 // Main container layout
@@ -1113,29 +1107,19 @@ public class InAppBrowser extends CordovaPlugin {
                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
                 lp.copyFrom(dialog.getWindow().getAttributes());
                 lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                // lp.height = WindowManager.LayoutParams.MATCH_PARENT; /* COMMENTED */
+                // lp.height = WindowManager.LayoutParams.MATCH_PARENT;
                 DisplayMetrics displayMetrics = new DisplayMetrics();
-                /* ADDED BY CANARY - START */
                 cordova.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
                 int displayWidth = displayMetrics.widthPixels;
                 int bottomreduceheightbyInPixels = dpToPixels(bottomreduceheightby);
-                int androidOffsetSpaceInPixels = dpToPixels(androidoffsetspace);
                 int statusbarHeight = this.statusBarHeight();
-                Log.e(LOG_TAG, "bottomreduceheightbyInPixels: " + bottomreduceheightbyInPixels);
-                Log.e(LOG_TAG, "statusbarHeight: " + px2dp(statusbarHeight));
                 int targetHeight = 0;
-                if(px2dp(statusbarHeight) <= 25) {
-                    // no notch
+                if(px2dp(statusbarHeight) <= 25) { // no notch
                     targetHeight = statusbarHeight;
                 }
-                Log.e(LOG_TAG, "targetHeight: " + targetHeight);
-                // no notch
-                // int displayHeight = displayMetrics.heightPixels - bottomreduceheightbyInPixels - 63;
-                // notch
                 int displayHeight = displayMetrics.heightPixels - bottomreduceheightbyInPixels - targetHeight;
                 lp.height = displayHeight;
                 lp.y = topmargin;
-                /* ADDED BY CANARY - END */
 
                 if (dialog != null) {
                     dialog.setContentView(main);
